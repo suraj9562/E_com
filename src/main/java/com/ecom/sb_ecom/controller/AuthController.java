@@ -1,9 +1,13 @@
 package com.ecom.sb_ecom.controller;
 
-import com.ecom.sb_ecom.model.User;
+import com.ecom.sb_ecom.security.payload.LoginRequest;
+import com.ecom.sb_ecom.security.payload.MessageResponse;
+import com.ecom.sb_ecom.security.payload.SignupRequest;
+import com.ecom.sb_ecom.security.payload.UserInfoResponse;
 import com.ecom.sb_ecom.service.AuthService;
-import com.ecom.sb_ecom.service.AuthServiceImpl;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,29 +21,32 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @PostMapping(name = "/signin")
-    public ResponseEntity signIn(){
-        return new ResponseEntity<>(HttpStatus.OK);
+    @PostMapping("/signin")
+    public ResponseEntity<UserInfoResponse> signIn(@RequestBody LoginRequest loginRequest){
+        return authService.signIn(loginRequest);
     }
 
-    @PostMapping(name = "/signup")
-    public ResponseEntity signUp(){
-        return new ResponseEntity<>(HttpStatus.OK);
+    @PostMapping("/signup")
+    public ResponseEntity<MessageResponse> signUp(@RequestBody SignupRequest signupRequest){
+        return new ResponseEntity<>(authService.signUp(signupRequest), HttpStatus.CREATED);
     }
 
-    @PostMapping(name = "/signout")
-    public ResponseEntity signOut(){
-        return new ResponseEntity<>(HttpStatus.OK);
+    @PostMapping("/signout")
+    public ResponseEntity<?> signOut(){
+        ResponseCookie cookie = authService.signOut();
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE,
+                        cookie.toString())
+                .body(new MessageResponse("You've been signed out!"));
     }
 
     @GetMapping("/username")
-    public ResponseEntity getCurrentUserName(){
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<String> getCurrentUserName(){
+        return new ResponseEntity<>(authService.getCurrentUserName(), HttpStatus.OK);
     }
 
     @GetMapping("/user")
-    public ResponseEntity getCurrentUser(){
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<UserInfoResponse> getCurrentUser(){
+        return new ResponseEntity<>(authService.getCurrentUser(), HttpStatus.OK);
     }
 
     @GetMapping("/sellers")

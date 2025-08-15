@@ -1,16 +1,20 @@
 package com.ecom.sb_ecom.security.jwt;
 
 import com.ecom.sb_ecom.exceptions.ApiException;
+import com.ecom.sb_ecom.security.services.UserDetailsImpl;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.WebUtils;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
@@ -24,6 +28,12 @@ public class JwtUtils {
     @Value("${application.jwtSecret}")
     private String jwtSecret;
 
+    @Value("${application.jwtCookieName}")
+    private String jwtCookie;
+
+    @Value("${application.maxCookieAge}")
+    private Long cookieAge;
+
     // extract token from header
     public String getJwtTokenFromHeader(HttpServletRequest request){
         String header = request.getHeader("Authorization");
@@ -33,6 +43,26 @@ public class JwtUtils {
         }
 
         return header.substring(7);
+    }
+
+    public String getTokenFromCookie(HttpServletRequest request){
+        Cookie cookie = WebUtils.getCookie(request, jwtCookie);
+
+        if(cookie == null){
+            return null;
+        }
+
+        return cookie.getValue();
+    }
+
+    public ResponseCookie generateJwtCookie(UserDetailsImpl user){
+        String token = generateJwtTokenUsingUserName(user);
+
+        return ResponseCookie.from(jwtCookie, token)
+                .path("/api")
+                .maxAge(cookieAge)
+                .httpOnly(false)
+                .build();
     }
 
     // extract username from token
@@ -60,7 +90,7 @@ public class JwtUtils {
     }
 
     // generate token using userName
-    public String generateJwtTokenUsingUserName(UserDetails userDetails){
+    public String generateJwtTokenUsingUserName(UserDetailsImpl userDetails){
         String username = userDetails.getUsername();
 
         return Jwts.builder()
@@ -74,5 +104,9 @@ public class JwtUtils {
     // key generation
     public SecretKey key(){
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
+    }
+
+    public ResponseCookie signOut() {
+        return ResponseCookie.from(jwtCookie, null).path("/api").build();
     }
 }
