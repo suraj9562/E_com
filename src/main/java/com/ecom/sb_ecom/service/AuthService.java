@@ -13,5 +13,5 @@ public interface AuthService {
     ResponseCookie signOut();
 
     String getCurrentUserName();
-    public UserInfoResponse getCurrentUser();
+    UserInfoResponse getCurrentUser();
 }
