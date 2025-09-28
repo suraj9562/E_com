@@ -1,23 +1,16 @@
-package com.ecom.sb_ecom.model;
+package com.ecom.sb_ecom.payload;
 
-import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "addresses")
-public class Address {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "address_id")
-    private long addressId;
+@NoArgsConstructor
+public class AddressDTO {
+    private Long id;
 
     @NotBlank
     @Size(min = 5, message = "street name must be of at least 5 characters")
@@ -42,10 +35,4 @@ public class Address {
     @NotBlank
     @Size(min = 5, message = "zip code must be of at least 6 characters")
     private String zipcode;
-
-    @ManyToOne
-    @JoinColumn(
-            name = "user_id"
-    )
-    private User user;
 }
