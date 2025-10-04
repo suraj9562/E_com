@@ -29,11 +29,8 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         try {
-            // fetch token from header
-            //String token = jwtUtils.getJwtTokenFromHeader(request);
-
             // fetch token from cookie
-            String token = jwtUtils.getTokenFromCookie(request);
+            String token = parseJWT(request);
 
             if (token == null) {
                 throw new ApiException("Token is not provided, Please provide token");
@@ -59,5 +56,15 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private String parseJWT(HttpServletRequest request){
+        String jwtToken = jwtUtils.getTokenFromCookie(request);
+
+        if(jwtToken != null){
+            return jwtToken;
+        }
+
+        return jwtUtils.getJwtTokenFromHeader(request);
     }
 }

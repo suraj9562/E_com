@@ -5,6 +5,11 @@ import com.ecom.sb_ecom.payload.AddressDTO;
 import com.ecom.sb_ecom.payload.AddressResponse;
 import com.ecom.sb_ecom.payload.ApiResponse;
 import com.ecom.sb_ecom.service.AddressService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +19,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api")
+@Tag(name = "Address Api's", description = "Api's for managing Address")
 public class AddressController {
     AddressService addressService;
 
@@ -27,6 +33,12 @@ public class AddressController {
     }
 
     @GetMapping("/addresses")
+    @Operation(summary = "Get All Addresses", description = "Api to get all Addresses")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Fetch addresses" ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "NO Address present", content = @Content),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
+    })
     public ResponseEntity<AddressResponse> getAllAddresses(
             @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
             @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
@@ -62,7 +74,7 @@ public class AddressController {
     }
 
     @DeleteMapping("/addresses/{id}")
-    public ResponseEntity<ApiResponse> deleteAddress(@PathVariable(name = "id") Long addressId) {
+    public ResponseEntity<ApiResponse> deleteAddress(@Parameter(description = "Id of the address which you want to delete") @PathVariable(name = "id") Long addressId) {
         return new ResponseEntity<>(addressService.deleteAddress(addressId), HttpStatus.OK);
     }
 }
